@@ -11,6 +11,7 @@ import { PageTransition } from "@/components/layout/PageTransition";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { PointerRipples } from "@/components/ui/PointerRipples";
 import { SITE } from "@/lib/data/nav";
+import { Analytics } from "@vercel/analytics/next";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["600", "700"], variable: "--font-outfit", display: "swap" });
 const instrumentSans = Instrument_Sans({
@@ -71,6 +72,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </LenisProvider>
           </OrbProvider>
         </MotionProvider>
+        <Analytics />
       </body>
     </html>
   );
