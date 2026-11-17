@@ -13,6 +13,7 @@ import { Nav } from "@/components/layout/Nav";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { RootJsonLd } from "@/components/seo/RootJsonLd";
 import { DEFAULT_OG_IMAGE } from "@/lib/seo";
+import { getPublishedSeo } from "@/lib/published-seo";
 import { SITE } from "@/lib/data/nav";
 
 const outfit = Outfit({ subsets: ["latin"], weight: ["400", "600", "700"], variable: "--font-outfit", display: "swap" });
@@ -26,7 +27,9 @@ const jetbrains = JetBrains_Mono({ subsets: ["latin"], weight: ["500"], variable
 
 const GA_MEASUREMENT_ID = "G-Q1K5C2ME2V";
 
-export const metadata: Metadata = {
+const CODE_GOOGLE_VERIFICATION = "fNF_2Wz9XYg_ZzPdnW8lleeBBbILqxIZEc5ZAjWs6v4";
+
+const SITE_METADATA: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
     default: "Clinic Genie | Strategies for Specialist Growth",
@@ -59,9 +62,16 @@ export const metadata: Metadata = {
   },
   icons: { icon: "/brand/brandmark.svg" },
   verification: {
-    google: "fNF_2Wz9XYg_ZzPdnW8lleeBBbILqxIZEc5ZAjWs6v4",
+    google: CODE_GOOGLE_VERIFICATION,
   },
 };
+
+/** Adds the Search Console tag published from Genie Works, if any, beside the code tag. */
+export async function generateMetadata(): Promise<Metadata> {
+  const published = (await getPublishedSeo())?.googleSiteVerification;
+  if (!published || published === CODE_GOOGLE_VERIFICATION) return SITE_METADATA;
+  return { ...SITE_METADATA, verification: { google: [CODE_GOOGLE_VERIFICATION, published] } };
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

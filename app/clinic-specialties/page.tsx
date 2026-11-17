@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -33,18 +33,20 @@ const SPECIALTIES_DESCRIPTION =
   "Marketing systems shaped around how patients search for specialist care in Singapore, from paediatrics and cardiology to dermatology, dental, neurology, and rehabilitation.";
 const SPECIALTIES_PATH = "/clinic-specialties";
 
-export const metadata: Metadata = pageMetadata({
-  title: SPECIALTIES_TITLE,
-  description: SPECIALTIES_DESCRIPTION,
-  path: SPECIALTIES_PATH,
-  keywords: [
-    "specialist clinic marketing",
-    "paediatric clinic marketing",
-    "cardiology clinic marketing",
-    "dermatology clinic marketing",
-    "clinic specialties Singapore",
-  ],
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: SPECIALTIES_TITLE,
+    description: SPECIALTIES_DESCRIPTION,
+    path: SPECIALTIES_PATH,
+    keywords: [
+      "specialist clinic marketing",
+      "paediatric clinic marketing",
+      "cardiology clinic marketing",
+      "dermatology clinic marketing",
+      "clinic specialties Singapore",
+    ],
+  });
+}
 
 export default function ClinicSpecialtiesPage() {
   return (

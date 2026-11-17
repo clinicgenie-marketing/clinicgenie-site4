@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -27,12 +27,14 @@ const CONTACT_DESCRIPTION =
   "Tell Clinic Genie where your clinic wants to grow. Book a strategy conversation about healthcare SEO, clinic websites, medical SEM, and compliance-aware marketing in Singapore.";
 const CONTACT_PATH = "/contact";
 
-export const metadata: Metadata = pageMetadata({
-  title: CONTACT_TITLE,
-  description: CONTACT_DESCRIPTION,
-  path: CONTACT_PATH,
-  keywords: ["clinic marketing enquiry", "book a strategy call", "Clinic Genie contact"],
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: CONTACT_TITLE,
+    description: CONTACT_DESCRIPTION,
+    path: CONTACT_PATH,
+    keywords: ["clinic marketing enquiry", "book a strategy call", "Clinic Genie contact"],
+  });
+}
 
 const NEXT_STEPS = [
   {

@@ -170,19 +170,34 @@ function buildEmailText(record: ContactSubmissionRecord): string {
   ].join("\n");
 }
 
-export async function sendContactNotification(
-  record: ContactSubmissionRecord
-): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_NOTIFICATION_EMAIL ?? "hello@clinicgenie.com";
-  const from =
-    process.env.RESEND_FROM_EMAIL ?? "Clinic Genie <onboarding@resend.dev>";
+const DEFAULT_NOTIFICATION_EMAILS = ["hello@clinic-genie.com", "marketing@clinic-genie.com"];
 
+/** CONTACT_NOTIFICATION_EMAIL accepts one address or a comma-separated list. */
+function notificationRecipients(): string[] {
+  const configured = (process.env.CONTACT_NOTIFICATION_EMAIL ?? "")
+    .split(",")
+    .map((address) => address.trim())
+    .filter(Boolean);
+  return configured.length > 0 ? configured : DEFAULT_NOTIFICATION_EMAILS;
+}
+
+function resendConfig() {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("Resend API key is not configured.");
   }
+  return {
+    resend: new Resend(apiKey),
+    to: notificationRecipients(),
+    from:
+      process.env.RESEND_FROM_EMAIL?.trim() || "Clinic Genie <onboarding@resend.dev>",
+  };
+}
 
-  const resend = new Resend(apiKey);
+export async function sendContactNotification(
+  record: ContactSubmissionRecord
+): Promise<void> {
+  const { resend, to, from } = resendConfig();
 
   const { error } = await resend.emails.send(
     {
@@ -198,6 +213,50 @@ export async function sendContactNotification(
 
   if (error) {
     console.error("Failed to send contact notification:", error.message);
+    throw new Error("Unable to send notification email.");
+  }
+}
+
+export async function sendNewsletterSignupNotification(
+  email: string,
+  id: string
+): Promise<void> {
+  const { resend, to, from } = resendConfig();
+  const safeEmail = escapeHtml(email);
+  const signedUpAt = new Date().toISOString();
+
+  const { error } = await resend.emails.send(
+    {
+      from,
+      to,
+      replyTo: email,
+      subject: `New Genie Tips signup: ${email}`,
+      html: `<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#062D36;">
+  New Genie Tips newsletter signup from the Clinic Genie website.
+</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:15px;color:#395D66;">
+  <strong>Email:</strong> <a href="mailto:${safeEmail}">${safeEmail}</a><br />
+  <strong>Signed up:</strong> ${escapeHtml(signedUpAt)}<br />
+  <strong>Signup ID:</strong> ${escapeHtml(id)}
+</p>
+<p style="font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#7A9399;">
+  Add this address to the Genie Tips mailing list.
+</p>`,
+      text: [
+        "New Genie Tips newsletter signup from the Clinic Genie website.",
+        "",
+        `Email: ${email}`,
+        `Signed up: ${signedUpAt}`,
+        `Signup ID: ${id}`,
+        "",
+        "Add this address to the Genie Tips mailing list.",
+      ].join("\n"),
+    },
+    { idempotencyKey: `newsletter-signup/${id}` }
+  );
+
+  if (error) {
+    console.error("Failed to send newsletter signup notification:", error.message);
     throw new Error("Unable to send notification email.");
   }
 }

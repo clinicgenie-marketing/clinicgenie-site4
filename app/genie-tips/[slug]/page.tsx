@@ -14,7 +14,7 @@ import {
   getPublishedPosts,
   getPublishedPostSlugs,
 } from "@/lib/notion";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   articleSchema,
   breadcrumbList,
@@ -42,7 +42,7 @@ export async function generateMetadata({
   const post = await getPostBySlug(params.slug);
 
   if (!post) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: "Genie Tip not found",
       description:
         "This Genie Tip could not be found. Browse clinic marketing insights from Clinic Genie.",
@@ -52,7 +52,7 @@ export async function generateMetadata({
     });
   }
 
-  return pageMetadata({
+  return publishedPageMetadata({
     title: `${post.title} | Genie Tips`,
     description:
       post.description ||

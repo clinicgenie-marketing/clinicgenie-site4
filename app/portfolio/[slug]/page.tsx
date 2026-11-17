@@ -6,7 +6,7 @@ import { ProjectComingSoon } from "@/components/portfolio/ProjectComingSoon";
 import { SpecialtyHubWorkTemplate } from "@/components/specialty-hub/SpecialtyHubWorkTemplate";
 import { CASE_STUDIES, getCaseStudy, isIndexableCaseStudy } from "@/lib/data/portfolio";
 import { getPortfolioWorkMeta } from "@/lib/data/specialty-hub-works";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   creativeWorkSchema,
@@ -23,10 +23,10 @@ export function generateMetadata({
   params,
 }: {
   params: { slug: string };
-}): Metadata {
+}): Promise<Metadata> {
   const study = getCaseStudy(params.slug);
   if (!study) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: "Project Coming Soon",
       description:
         "This project story is still brewing. Browse Our Works for specialist clinic projects from Clinic Genie.",
@@ -36,7 +36,7 @@ export function generateMetadata({
     });
   }
 
-  return pageMetadata({
+  return publishedPageMetadata({
     title: study.name,
     description: study.metaDescription ?? study.line,
     path: `/portfolio/${params.slug}`,

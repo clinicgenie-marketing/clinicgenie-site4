@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Metadata, Viewport } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { DEFAULT_KEYWORDS, pageMetadata } from "@/lib/seo";
+import { DEFAULT_KEYWORDS } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import { schemaGraph, webPageSchema } from "@/lib/schema";
 import { Hero } from "@/components/home/Hero";
 import { LogoMarquee } from "@/components/home/LogoMarquee";
@@ -55,14 +56,16 @@ const HOME_TITLE = "Healthcare Marketing Agency Singapore | Clinic Genie";
 const HOME_DESCRIPTION =
   "Clinic Genie is a Singapore healthcare marketing agency for specialist clinics. Healthcare SEO, medical SEM, clinic websites, content and AI search, built within PHMC and HCSA guidelines.";
 
-export const metadata: Metadata = pageMetadata({
-  title: HOME_TITLE,
-  ogTitle: "Clinic Genie | Strategies for Specialist Growth",
-  description: HOME_DESCRIPTION,
-  path: "/",
-  keywords: [...DEFAULT_KEYWORDS],
-  absoluteTitle: true,
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: HOME_TITLE,
+    ogTitle: "Clinic Genie | Strategies for Specialist Growth",
+    description: HOME_DESCRIPTION,
+    path: "/",
+    keywords: [...DEFAULT_KEYWORDS],
+    absoluteTitle: true,
+  });
+}
 
 export const viewport: Viewport = {
   themeColor: "#EAFBFB",

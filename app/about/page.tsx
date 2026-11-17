@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -23,16 +23,18 @@ const ABOUT_DESCRIPTION =
   "Clinic Genie is a medical marketing agency for specialist clinics in Singapore. We help clinics get found, trusted, and chosen, with strategy built around healthcare search, websites, and compliance-aware growth.";
 const ABOUT_PATH = "/about";
 
-export const metadata: Metadata = pageMetadata({
-  title: ABOUT_TITLE,
-  description: ABOUT_DESCRIPTION,
-  path: ABOUT_PATH,
-  keywords: [
-    "about Clinic Genie",
-    "specialist clinic marketing",
-    "healthcare marketing Singapore",
-  ],
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: ABOUT_TITLE,
+    description: ABOUT_DESCRIPTION,
+    path: ABOUT_PATH,
+    keywords: [
+      "about Clinic Genie",
+      "specialist clinic marketing",
+      "healthcare marketing Singapore",
+    ],
+  });
+}
 
 export default function AboutPage() {
   return (

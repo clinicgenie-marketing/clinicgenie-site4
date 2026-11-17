@@ -26,7 +26,7 @@ import {
 } from "@/lib/data/pillar-hero-images";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CORE_PILLARS, getPillar } from "@/lib/data/pillars";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   faqPageSchema,
@@ -151,10 +151,10 @@ const PILLAR_KEYWORDS: Record<string, string[]> = {
   "geo-ai-search": ["GEO", "AI search readiness", "clinic AI visibility"],
 };
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+export function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const pillar = getPillar(params.slug);
   if (!pillar) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: "Service not found",
       description:
         "This Clinic Genie service page could not be found. Explore our core service pillars instead.",
@@ -164,7 +164,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     });
   }
 
-  return pageMetadata({
+  return publishedPageMetadata({
     title: pillar.name,
     description: pillar.heroParagraph.join(" "),
     path: `/services/core-pillars/${pillar.slug}`,
