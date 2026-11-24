@@ -7,6 +7,7 @@ import {
 } from "@/lib/contact/schema";
 import { sendContactNotification } from "@/lib/contact/notify";
 import { allowContactAttempt, getClientIp } from "@/lib/contact/rate-limit";
+import { hasEnquiryDatabase, markEnquiryNotification, saveEnquirySubmission } from "@/lib/contact/enquiry-store";
 import { saveContactSubmission } from "@/lib/supabase/admin";
 
 function hasSupabaseConfig(): boolean {
@@ -51,14 +52,22 @@ export async function POST(request: Request) {
   }
 
   try {
-    let record: ContactSubmissionRecord;
+    let record: ContactSubmissionRecord = buildLocalRecord(parsed.data);
     let persisted = false;
+    let savedToEnquiryDb = false;
 
-    if (hasSupabaseConfig()) {
-      record = await saveContactSubmission(parsed.data);
-      persisted = true;
-    } else {
-      record = buildLocalRecord(parsed.data);
+    // A storage failure must not stop the notification email from going out.
+    try {
+      if (hasEnquiryDatabase()) {
+        record = await saveEnquirySubmission(parsed.data);
+        persisted = true;
+        savedToEnquiryDb = true;
+      } else if (hasSupabaseConfig()) {
+        record = await saveContactSubmission(parsed.data);
+        persisted = true;
+      }
+    } catch (storageError) {
+      console.error("Contact persistence failed:", storageError);
     }
 
     let emailed = false;
@@ -67,6 +76,10 @@ export async function POST(request: Request) {
       emailed = true;
     } catch (emailError) {
       console.error("Contact notification failed:", emailError);
+    }
+
+    if (savedToEnquiryDb) {
+      await markEnquiryNotification(record.id, emailed);
     }
 
     if (!persisted && !emailed) {

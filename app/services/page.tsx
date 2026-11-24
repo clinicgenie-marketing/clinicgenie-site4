@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { DEFAULT_KEYWORDS, pageMetadata } from "@/lib/seo";
+import { DEFAULT_KEYWORDS } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -24,12 +25,14 @@ const SERVICES_DESCRIPTION =
   "Healthcare SEO, medical SEM, clinic websites, branding, content, AI search, and compliance-aware strategy for specialist clinics in Singapore. Eight services, one growth engine.";
 const SERVICES_PATH = "/services";
 
-export const metadata: Metadata = pageMetadata({
-  title: SERVICES_TITLE,
-  description: SERVICES_DESCRIPTION,
-  path: SERVICES_PATH,
-  keywords: [...DEFAULT_KEYWORDS, "clinic digital strategy"],
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: SERVICES_TITLE,
+    description: SERVICES_DESCRIPTION,
+    path: SERVICES_PATH,
+    keywords: [...DEFAULT_KEYWORDS, "clinic digital strategy"],
+  });
+}
 
 export default function ServicesPage() {
   return (

@@ -8,7 +8,7 @@ import {
   getSpecialtyHub,
   isSpecialtyHubDetail,
 } from "@/lib/data/specialty-hubs";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   faqPageSchema,
@@ -21,12 +21,12 @@ export function generateStaticParams() {
   return getPublishedSpecialtyHubs().map((hub) => ({ slug: hub.slug }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
+export function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const path = `/clinic-specialties/${params.slug}`;
   const hub = getSpecialtyHub(params.slug);
 
   if (!hub?.published) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: "Clinic specialty not found",
       description:
         "This clinic specialty page could not be found. Explore Clinic Genie specialties for specialist clinic marketing in Singapore.",
@@ -37,7 +37,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   }
 
   if (isSpecialtyHubDetail(hub) && hub.metaTitle && hub.metaDescription) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: hub.metaTitle,
       description: hub.metaDescription,
       path,
@@ -45,7 +45,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     });
   }
 
-  return pageMetadata({
+  return publishedPageMetadata({
     title: `${hub.name} specialty insights`,
     description: `${hub.name} specialty marketing insights from Clinic Genie are coming soon. Browse Our Works for live specialist clinic case studies.`,
     path,

@@ -120,7 +120,7 @@ export function ContactForm() {
         }),
       });
 
-      const payload = (await response.json()) as { error?: string };
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
 
       if (!response.ok) {
         throw new Error(payload.error ?? "We could not send your enquiry right now.");
@@ -143,7 +143,17 @@ export function ContactForm() {
   return (
     <div className={styles.formCard}>
       <div className="p-7 sm:p-8">
-        <form onSubmit={handleSubmit} onInvalid={handleInvalid} className={styles.formBody}>
+        <form
+          onSubmit={handleSubmit}
+          onInvalid={handleInvalid}
+          onChange={(e) => {
+            if (errorField && (e.target as HTMLInputElement).name === errorField) {
+              setError(null);
+              setErrorField(null);
+            }
+          }}
+          className={styles.formBody}
+        >
           <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
             <label htmlFor={`${baseId}-website`}>Website</label>
             <input
@@ -166,6 +176,7 @@ export function ContactForm() {
               <input
                 id={fid("name")}
                 name="name"
+                maxLength={200}
                 type="text"
                 autoComplete="name"
                 required
@@ -190,6 +201,7 @@ export function ContactForm() {
               <input
                 id={fid("clinic")}
                 name="clinic"
+                maxLength={200}
                 type="text"
                 autoComplete="organization"
                 required
@@ -214,6 +226,7 @@ export function ContactForm() {
               <input
                 id={fid("email")}
                 name="email"
+                maxLength={320}
                 type="email"
                 autoComplete="email"
                 required
@@ -238,6 +251,7 @@ export function ContactForm() {
               <input
                 id={fid("phone")}
                 name="phone"
+                maxLength={30}
                 type="tel"
                 autoComplete="tel"
                 aria-invalid={invalid("phone")}
@@ -300,6 +314,7 @@ export function ContactForm() {
             <textarea
               id={fid("message")}
               name="message"
+              maxLength={5000}
               rows={4}
               required
               aria-invalid={invalid("message")}

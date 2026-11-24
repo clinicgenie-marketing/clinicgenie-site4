@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -16,16 +16,18 @@ const PORTFOLIO_DESCRIPTION =
   "Selected brands, websites, and campaigns Clinic Genie has built for specialist clinics in Singapore. Strategy, design, and search brought into one clear growth system.";
 const PORTFOLIO_PATH = "/portfolio";
 
-export const metadata: Metadata = pageMetadata({
-  title: PORTFOLIO_TITLE,
-  description: PORTFOLIO_DESCRIPTION,
-  path: PORTFOLIO_PATH,
-  keywords: [
-    "clinic website case studies",
-    "healthcare branding Singapore",
-    "specialist clinic marketing work",
-  ],
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: PORTFOLIO_TITLE,
+    description: PORTFOLIO_DESCRIPTION,
+    path: PORTFOLIO_PATH,
+    keywords: [
+      "clinic website case studies",
+      "healthcare branding Singapore",
+      "specialist clinic marketing work",
+    ],
+  });
+}
 
 export default function PortfolioPage() {
   return (

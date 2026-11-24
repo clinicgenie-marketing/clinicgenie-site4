@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { permanentRedirect } from "next/navigation";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { DEFAULT_KEYWORDS, pageMetadata } from "@/lib/seo";
+import { DEFAULT_KEYWORDS } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -40,11 +41,11 @@ function parsePage(value: string | undefined): number {
 
 export function generateMetadata({
   searchParams,
-}: GenieTipsPageProps): Metadata {
+}: GenieTipsPageProps): Promise<Metadata> {
   const page = parsePage(searchParams?.page);
 
   if (page > 1) {
-    return pageMetadata({
+    return publishedPageMetadata({
       title: `${GENIE_TIPS_TITLE}, page ${page}`,
       description: GENIE_TIPS_DESCRIPTION,
       path: `${GENIE_TIPS_PATH}?page=${page}`,
@@ -54,7 +55,7 @@ export function generateMetadata({
     });
   }
 
-  return pageMetadata({
+  return publishedPageMetadata({
     title: GENIE_TIPS_TITLE,
     description: GENIE_TIPS_DESCRIPTION,
     path: GENIE_TIPS_PATH,

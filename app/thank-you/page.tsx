@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import { Section } from "@/components/ui/Section";
 import { Container } from "@/components/ui/Container";
 import { Reveal, RevealGroup, RevealItem } from "@/components/ui/Reveal";
@@ -16,14 +16,16 @@ import {
 import { ThankYouHero } from "@/components/contact/ThankYouHero";
 import { SITE } from "@/lib/data/nav";
 
-export const metadata: Metadata = pageMetadata({
-  title: "Wish Received",
-  description:
-    "Thank you for reaching out to Clinic Genie. We have your enquiry and will look at it with your clinic, goals, and growth in mind.",
-  path: "/thank-you",
-  index: false,
-  follow: false,
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: "Wish Received",
+    description:
+      "Thank you for reaching out to Clinic Genie. We have your enquiry and will look at it with your clinic, goals, and growth in mind.",
+    path: "/thank-you",
+    index: false,
+    follow: false,
+  });
+}
 
 const NEXT_STEPS = [
   {

@@ -11,20 +11,45 @@ import { useOrbStore } from "@/components/orb/store";
 import { ease } from "@/lib/motion";
 
 /**
- * Email capture for Genie Tips. No real network call — on submit it shows a
- * friendly success state and fires the orb's one-shot burst (the orb "delivers"
- * the signup with a sparkle flare).
+ * Email capture for Genie Tips. Posts to /api/newsletter, which emails the
+ * signup to the team inbox; on success it fires the orb's one-shot burst.
  */
 export function NewsletterCapture() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const burst = useOrbStore((s) => s.burst);
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email.trim()) return;
-    burst();
-    setSent(true);
+    if (!email.trim() || submitting) return;
+
+    setSubmitting(true);
+    setError(null);
+    const website = new FormData(e.currentTarget).get("website");
+
+    try {
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, website }),
+      });
+      const payload = (await response.json().catch(() => ({}))) as { error?: string };
+      if (!response.ok) {
+        throw new Error(payload.error ?? "We could not sign you up right now. Please try again.");
+      }
+      burst();
+      setSent(true);
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "We could not sign you up right now. Please try again."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -89,6 +114,10 @@ export function NewsletterCapture() {
                     onSubmit={handleSubmit}
                     className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
                   >
+                    <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+                      <label htmlFor="newsletter-website">Website</label>
+                      <input id="newsletter-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+                    </div>
                     <label htmlFor="newsletter-email" className="sr-only">
                       Your email address
                     </label>
@@ -102,12 +131,23 @@ export function NewsletterCapture() {
                       autoComplete="email"
                       className="w-full flex-1 rounded-pill border border-white/15 bg-white/[0.06] px-5 py-3.5 text-onDark placeholder:text-onDark-faint transition-[border-color,box-shadow] duration-ui ease-out-soft focus:border-genie-400/60 focus:outline-none focus:ring-2 focus:ring-genie-400/30"
                     />
-                    <MagneticButton type="submit" size="md" withMiniOrb className="shrink-0">
-                      Send me Genie Tips
+                    <MagneticButton
+                      type="submit"
+                      size="md"
+                      withMiniOrb
+                      className="shrink-0"
+                      disabled={submitting}
+                    >
+                      {submitting ? "Sending..." : "Send me Genie Tips"}
                     </MagneticButton>
                   </motion.form>
                 )}
               </AnimatePresence>
+              {error && !sent ? (
+                <p role="alert" className="mt-3 text-sm text-feedback-error">
+                  {error}
+                </p>
+              ) : null}
             </div>
 
             {!sent && (

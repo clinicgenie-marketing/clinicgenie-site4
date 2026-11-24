@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { pageMetadata } from "@/lib/seo";
+import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   breadcrumbList,
   nestedBreadcrumbs,
@@ -22,11 +22,13 @@ const TERMS_DESCRIPTION =
   "The terms and privacy provisions that apply when you use the Clinic Genie website, including how we collect, use, protect, and manage information shared with us.";
 const TERMS_PATH = "/terms-privacy";
 
-export const metadata: Metadata = pageMetadata({
-  title: TERMS_TITLE,
-  description: TERMS_DESCRIPTION,
-  path: TERMS_PATH,
-});
+export function generateMetadata(): Promise<Metadata> {
+  return publishedPageMetadata({
+    title: TERMS_TITLE,
+    description: TERMS_DESCRIPTION,
+    path: TERMS_PATH,
+  });
+}
 
 function LegalBlockView({ block }: { block: LegalBlock }) {
   if (block.type === "h3") {
