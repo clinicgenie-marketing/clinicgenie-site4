@@ -1,6 +1,6 @@
 import { SERVICES_GROUPS, SITE } from "@/lib/data/nav";
 import { getPublishedSpecialtyHubs, isSpecialtyHubDetail } from "@/lib/data/specialty-hubs";
-import { getPublishedPosts } from "@/lib/notion";
+import { getAllGenieTips } from "@/lib/genie-tips";
 import { siteUrl } from "@/lib/schema";
 
 // Plain-text site guide for AI assistants and answer engines (https://llmstxt.org).
@@ -21,7 +21,7 @@ export async function GET() {
 
   let tips: string[] = [];
   try {
-    const posts = await getPublishedPosts();
+    const posts = await getAllGenieTips();
     tips = posts
       .filter((post) => !post.noIndex)
       .map((post) => link(post.title, `/genie-tips/${post.slug}`, post.description));
