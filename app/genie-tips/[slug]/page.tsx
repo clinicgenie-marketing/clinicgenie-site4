@@ -3,17 +3,16 @@ import { notFound } from "next/navigation";
 import { GenieTipArticleSidebar } from "@/components/blog/GenieTipArticleSidebar";
 import { GenieTipCoverImage, GENIE_TIP_COVER_SIZES } from "@/components/blog/GenieTipCoverImage";
 import { LatestGenieTipsSection } from "@/components/blog/LatestGenieTipsSection";
+import { GenieWorksArticleView } from "@/components/blog/GenieWorksArticleView";
 import { NotionArticleBody } from "@/components/blog/NotionArticleBody";
 import { BackLink } from "@/components/ui/BackLink";
 import { Container } from "@/components/ui/Container";
 import { PageFinale } from "@/components/ui/PageFinale";
 import { PageFinaleCTA } from "@/components/ui/PageFinaleCTA";
 import { JsonLd } from "@/components/seo/JsonLd";
-import {
-  getPostBySlug,
-  getPublishedPosts,
-  getPublishedPostSlugs,
-} from "@/lib/notion";
+import { getGenieWorksArticle, mediaPath, type GenieWorksArticle } from "@/lib/genie-works";
+import { getAllGenieTips } from "@/lib/genie-tips";
+import { getPostBySlug } from "@/lib/notion";
 import { publishedPageMetadata } from "@/lib/published-seo";
 import {
   articleSchema,
@@ -32,14 +31,19 @@ type GenieTipPageProps = {
 };
 
 export async function generateStaticParams() {
-  const slugs = await getPublishedPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const posts = await getAllGenieTips();
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({
   params,
 }: GenieTipPageProps): Promise<Metadata> {
   const post = await getPostBySlug(params.slug);
+  const genieWorks = post ? null : await getGenieWorksArticle(params.slug);
+
+  if (genieWorks) {
+    return genieWorksMetadata(genieWorks);
+  }
 
   if (!post) {
     return publishedPageMetadata({
@@ -67,14 +71,42 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Genie Works checks these two tags when it verifies Ship to site: the revision shown, and a
+ * same-origin featured image (Genie Works D89).
+ */
+async function genieWorksMetadata(article: GenieWorksArticle): Promise<Metadata> {
+  const description =
+    article.seoDescription ||
+    article.excerpt ||
+    "Clinic marketing insight from Clinic Genie for specialist clinics in Singapore.";
+  const shareId = article.socialMediaId ?? article.featuredMediaId;
+  const metadata = await publishedPageMetadata({
+    title: `${article.seoTitle || article.title} | Genie Tips`,
+    description,
+    path: `/genie-tips/${article.slug}`,
+    keywords: article.category ? [article.category] : ["clinic marketing insights"],
+    ogType: "article",
+    index: article.indexable,
+    follow: article.indexable,
+    image: shareId ? mediaPath(shareId) : undefined,
+    publishedTime: article.publishedAt ?? undefined,
+  });
+  const other: Record<string, string> = { "genie-works-revision": article.versionId };
+  if (article.featuredMediaId) other["genie-works-featured-image"] = mediaPath(article.featuredMediaId);
+  return { ...metadata, other: { ...metadata.other, ...other } };
+}
+
 export default async function GenieTipPage({ params }: GenieTipPageProps) {
   const [post, allPosts] = await Promise.all([
     getPostBySlug(params.slug),
-    getPublishedPosts(),
+    getAllGenieTips(),
   ]);
 
   if (!post) {
-    notFound();
+    const article = await getGenieWorksArticle(params.slug);
+    if (!article) notFound();
+    return <GenieWorksTipPage article={article} allPosts={allPosts} />;
   }
 
   const latestPosts = allPosts
@@ -178,6 +210,60 @@ export default async function GenieTipPage({ params }: GenieTipPageProps) {
 
       <LatestGenieTipsSection posts={latestPosts} />
 
+      <PageFinale backdropClassName="bg-cg-teal-5">
+        <PageFinaleCTA
+          kicker="Make your first wish"
+          title="Want a clearer patient journey for your clinic?"
+          highlight="clearer patient journey"
+          body="Book a strategy call. We will map how patients find, understand, and enquire with your clinic, then show you where Clinic Genie can help."
+          primaryCta={{ href: "/contact", label: "Make Your First Wish" }}
+          secondaryCta={{ href: "/portfolio", label: "See Our Work" }}
+          footnote="No obligation. No jargon. Just a clear next step."
+        />
+      </PageFinale>
+    </div>
+  );
+}
+
+function GenieWorksTipPage({
+  article,
+  allPosts,
+}: {
+  article: GenieWorksArticle;
+  allPosts: Awaited<ReturnType<typeof getAllGenieTips>>;
+}) {
+  const path = `/genie-tips/${article.slug}`;
+  const description =
+    article.seoDescription ||
+    article.excerpt ||
+    "Clinic marketing insight from Clinic Genie for specialist clinics in Singapore.";
+  const latestPosts = allPosts.filter((item) => item.slug !== article.slug).slice(0, 3);
+
+  return (
+    <div className="min-h-screen bg-white text-ink-900">
+      <JsonLd
+        data={schemaGraph([
+          webPageSchema({ path, name: article.title, description }),
+          breadcrumbList(
+            nestedBreadcrumbs([
+              { name: "Genie Tips", path: "/genie-tips" },
+              { name: article.title, path },
+            ])
+          ),
+          article.indexable
+            ? articleSchema({
+                title: article.title,
+                description,
+                path,
+                datePublished: article.publishedAt?.slice(0, 10) ?? null,
+                image: article.featuredMediaId ? mediaPath(article.featuredMediaId) : null,
+                keywords: article.category ? [article.category] : undefined,
+              })
+            : null,
+        ])}
+      />
+      <GenieWorksArticleView article={article} />
+      <LatestGenieTipsSection posts={latestPosts} />
       <PageFinale backdropClassName="bg-cg-teal-5">
         <PageFinaleCTA
           kicker="Make your first wish"

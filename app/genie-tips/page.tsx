@@ -17,7 +17,7 @@ import { Container } from "@/components/ui/Container";
 import { GenieTipsHero } from "@/components/blog/GenieTipsHero";
 import { PageFinale } from "@/components/ui/PageFinale";
 import { PageFinaleCTA } from "@/components/ui/PageFinaleCTA";
-import { getPublishedPosts } from "@/lib/notion";
+import { getAllGenieTips } from "@/lib/genie-tips";
 
 export const revalidate = 60;
 
@@ -70,7 +70,7 @@ export default async function GenieTipsPage({
     permanentRedirect(GENIE_TIPS_PATH);
   }
 
-  const posts = await getPublishedPosts();
+  const posts = await getAllGenieTips();
   const [featuredPost, ...remainingPosts] = posts;
   const currentPage = parsePage(searchParams?.page);
   const totalPages = Math.max(

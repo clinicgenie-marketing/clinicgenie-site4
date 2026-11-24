@@ -3,7 +3,7 @@ import { SITE } from "@/lib/data/nav";
 import { CASE_STUDIES, isIndexableCaseStudy } from "@/lib/data/portfolio";
 import { CORE_PILLARS } from "@/lib/data/pillars";
 import { getPublishedSpecialtyHubs, isSpecialtyHubDetail } from "@/lib/data/specialty-hubs";
-import { getPublishedPosts } from "@/lib/notion";
+import { getAllGenieTips } from "@/lib/genie-tips";
 
 const BASE = SITE.url.replace(/\/$/, "");
 
@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   let genieTipRoutes: string[] = [];
   try {
-    const posts = await getPublishedPosts();
+    const posts = await getAllGenieTips();
     genieTipRoutes = posts
       .filter((post) => !post.noIndex)
       .map((post) => `/genie-tips/${post.slug}`);

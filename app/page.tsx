@@ -11,7 +11,7 @@ import { MagneticButton } from "@/components/ui/MagneticButton";
 import { InsightPreviewCard } from "@/components/home/landing/InsightPreviewCard";
 import { CORE_PILLARS } from "@/lib/data/pillars";
 import { HOME_PROCESS_STEPS } from "@/lib/data/services";
-import { getPublishedPosts } from "@/lib/notion";
+import { getAllGenieTips } from "@/lib/genie-tips";
 import {
   LandingSection,
   LandingIntro,
@@ -74,7 +74,7 @@ export const viewport: Viewport = {
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const insightPosts = (await getPublishedPosts()).slice(0, 3);
+  const insightPosts = (await getAllGenieTips()).slice(0, 3);
 
   return (
     <div className="home-landing-flow">
